@@ -76,11 +76,13 @@ app.put("/campgrounds/:id", async (req, res) => {
 });
 
 // DELETE DOC
-
+app.delete("/campgrounds/:id", async (req, res) => {
+  const { id } = req.params;
+  const campground = await Campground.findById(id);
+  await Campground.findByIdAndDelete(id, { ...req.body.campground });
+  res.redirect("/campgrounds");
+});
 
 app.listen("3000", () => {
   console.log("LISTENING ON PORT 3000");
 });
-
-// 6139844832d0dbc38e91c456
-// 6139844832d0dbc38e91c452
