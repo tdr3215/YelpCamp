@@ -1,6 +1,7 @@
 const express = require("express");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const ejsMate = require("ejs-mate");
 const app = express();
 const methodOverride = require("method-override");
 const path = require("path");
@@ -31,17 +32,15 @@ app.set("views", path.join(__dirname, "/views"));
 app.use(express.urlencoded({ extended: true })); //PARSING req.body
 app.use(methodOverride("_method"));
 
+// LAYOUT
+app.engine("ejs", ejsMate);
+
+// ROUTING
 app.get("/", (req, res) => {
   res.render("home");
 });
 
-app.post("/campgrounds", async (req, res) => {
-  const campground = new Campground(req.body.campground);
-  await campground.save();
-  res.redirect(`/campgrounds/${campground._id}`);
-});
-
-// HOME
+// INDEX
 app.get("/campgrounds", async (req, res) => {
   const campgrounds = await Campground.find({});
   res.render("campgrounds/index", { campgrounds });
@@ -50,6 +49,11 @@ app.get("/campgrounds", async (req, res) => {
 // NEW DOC
 app.get("/campgrounds/new", (req, res) => {
   res.render("campgrounds/new");
+});
+app.post("/campgrounds", async (req, res) => {
+  const campground = new Campground(req.body.campground);
+  await campground.save();
+  res.redirect(`/campgrounds/${campground._id}`);
 });
 
 // SHOW DOC
