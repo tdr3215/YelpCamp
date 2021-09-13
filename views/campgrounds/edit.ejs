@@ -23,3 +23,77 @@
 <footer>
   <a href="/campgrounds/<%= campgrounds.id %> ">Back to Campground</a>
 </footer>
+
+<!--  -->
+
+<div class="row">
+  <h1 class="text-center">Edit Campground</h1>
+  <div class="col-6 offset-3">
+    <form
+      action="/campgrounds/<%= campgrounds._id %>?_method=PUT"
+      method="POST"
+    >
+      <div class="mb-3">
+        <label class="form-label" for="title">Title</label>
+        <input
+          class="form-control"
+          type="text"
+          name="campground[title]"
+          value="<%= campgrounds.title %>"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="location">Location</label>
+        <input
+          class="form-control"
+          type="text"
+          name="campground[location]"
+          value="<%= campgrounds.location %>"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="image">Image URL</label>
+        <input
+          class="form-control"
+          type="text"
+          name="campground[image]"
+          value="<%= campgrounds.image %>"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="price">Campground Price</label>
+        <div class="input-group">
+          <span class="input-group-text" id="price-label">$</span>
+          <input
+            type="text"
+            class="form-control"
+            id="price"
+            placeholder="0.00"
+            aria-label="price-label"
+            name="campground[price]"
+            aria-describedby="basic-addon1"
+            value="<%= campgrounds.price %>"
+          />
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="description">Description </label>
+        <textarea
+          class="form-control"
+          type="text"
+          name="campground[description]"
+        >
+        <%= campgrounds.description %>
+      </textarea
+        >
+      </div>
+
+      <div class="mb-3">
+        <button class="btn btn-info">Update Campground</button>
+      </div>
+    </form>
+    <a href="/campgrounds/<%= campgrounds.id %> ">Back to Campground</a>
+  </div>
+</div>
