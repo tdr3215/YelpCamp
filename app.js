@@ -8,6 +8,8 @@ const path = require("path");
 const Campground = require("./models/campground");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
+const { campgroundSchema } = require("./schemas");
+
 // MONGOOSE REQUIREMENTS
 mongoose
   .connect("mongodb://localhost:27017/yelp-camp")
@@ -32,6 +34,15 @@ app.set("views", path.join(__dirname, "/views"));
 // MIDDLEWARE
 app.use(express.urlencoded({ extended: true })); //PARSING req.body
 app.use(methodOverride("_method"));
+const validateCampground = (req, res, next) => {
+  const { error } = campgroundSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
 
 // LAYOUT
 app.engine("ejs", ejsMate);
@@ -56,9 +67,11 @@ app.get("/campgrounds/new", (req, res) => {
 });
 app.post(
   "/campgrounds",
+  validateCampground,
   catchAsync(async (req, res, next) => {
-    if (!req.body.Campground)
-      throw new ExpressError("Invalid Campground Data", 400);
+    // if (!req.body.Campground)
+    //   throw new ExpressError("Invalid Campground Data", 400);
+
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -85,6 +98,7 @@ app.get(
 
 app.put(
   "/campgrounds/:id",
+  validateCampground,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
@@ -117,7 +131,8 @@ app.all("*", (req, res, next) => {
 // GENERIC ERROR HANDLER
 app.use((err, req, res, next) => {
   const { statusCode = 500, message = "Something went wrong" } = err;
-  res.status(statusCode).send(message);
+  if (!err.message) err.message = "Oh No,Something Went Wrong";
+  res.status(statusCode).render("error", { err });
 });
 
 app.listen("3000", () => {
