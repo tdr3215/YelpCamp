@@ -8,8 +8,9 @@ const path = require("path");
 const Campground = require("./models/campground");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
-const { campgroundSchema } = require("./schemas");
+const { campgroundSchema, reviewSchema } = require("./schemas");
 const Review = require("./models/reviews");
+const campground = require("./models/campground");
 
 // MONGOOSE REQUIREMENTS
 mongoose
@@ -35,6 +36,8 @@ app.set("views", path.join(__dirname, "/views"));
 // MIDDLEWARE
 app.use(express.urlencoded({ extended: true })); //PARSING req.body
 app.use(methodOverride("_method"));
+
+// FORM VALIDATION
 const validateCampground = (req, res, next) => {
   const { error } = campgroundSchema.validate(req.body);
   if (error) {
@@ -45,6 +48,15 @@ const validateCampground = (req, res, next) => {
   }
 };
 
+const validateReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
 // LAYOUT
 app.engine("ejs", ejsMate);
 
@@ -83,7 +95,9 @@ app.post(
 app.get(
   "/campgrounds/:id",
   catchAsync(async (req, res) => {
-    const campgrounds = await Campground.findById(req.params.id);
+    const campgrounds = await Campground.findById(req.params.id).populate(
+      "reviews"
+    );
     res.render("campgrounds/show", { campgrounds });
   })
 );
@@ -127,6 +141,7 @@ app.delete(
 
 app.post(
   "/campgrounds/:id/reviews",
+  validateReview,
   catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review); //this is why we did review[rating] in the show page
