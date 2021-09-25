@@ -9,6 +9,7 @@ const Campground = require("./models/campground");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
 const { campgroundSchema } = require("./schemas");
+const Review = require("./models/reviews");
 
 // MONGOOSE REQUIREMENTS
 mongoose
@@ -119,6 +120,20 @@ app.delete(
     const campground = await Campground.findById(id);
     await Campground.findByIdAndDelete(id, { ...req.body.campground });
     res.redirect("/campgrounds");
+  })
+);
+
+// REVIEWS
+
+app.post(
+  "/campgrounds/:id/reviews",
+  catchAsync(async (req, res) => {
+    const campground = await Campground.findById(req.params.id);
+    const review = new Review(req.body.review); //this is why we did review[rating] in the show page
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
   })
 );
 
