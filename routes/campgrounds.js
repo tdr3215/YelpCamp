@@ -16,7 +16,6 @@ const validateCampground = (req, res, next) => {
   }
 };
 
-
 // INDEX
 router.get(
   "/",
@@ -28,7 +27,7 @@ router.get(
 
 // NEW DOC
 router.get("/new", (req, res) => {
-  res.render("/new");
+  res.render("campgrounds/new");
 });
 router.post(
   "/",
@@ -39,6 +38,7 @@ router.post(
 
     const campground = new Campground(req.body.campground);
     await campground.save();
+    req.flash("success", "Succesfully made a new campgorund!");
     res.redirect(`/campgrounds/${campground._id}`);
   })
 );
@@ -50,6 +50,10 @@ router.get(
     const campgrounds = await Campground.findById(req.params.id).populate(
       "reviews"
     );
+    if (!campgrounds) {
+      req.flash("error", "Cannot find that campground!");
+      return res.redirect("/campgrounds");
+    }
     res.render("campgrounds/show", { campgrounds });
   })
 );
@@ -74,6 +78,7 @@ router.put(
       { ...req.body.campground },
       { new: true }
     );
+    req.flash("success", "Successfully Updated Campground!");
     res.redirect(`/campgrounds/${campground._id}`);
   })
 );
@@ -88,6 +93,5 @@ router.delete(
     res.redirect("/campgrounds");
   })
 );
-
 
 module.exports = router;
